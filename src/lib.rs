@@ -2,10 +2,8 @@ extern crate rand;
 
 use std::env;
 use std::fs;
-use std::fs::File;
-use std::path::Path;
 
-use std::ops::Drop;
+use std::path::Path;
 
 use self::rand::Rng;
 
@@ -92,45 +90,51 @@ fn make_tmp_file_name() -> String {
     return dir.join(name).to_str().unwrap().to_string();
 }
 
-#[test]
-fn test_temp_file_deleted() {
-    let name = cotest_create_temp_file();
-    assert_eq!(Path::new(name.as_str()).exists(), false);
-}
+#[cfg(test)]
+mod test {
 
-#[allow(unused)]
-fn cotest_create_temp_file() -> String {
-    let a = Temp::new().unwrap();
-    File::create(a.path.as_str()).unwrap();
-    assert_eq!(Path::new(a.path.as_str()).exists(), true);
-    a.path.clone()
-}
+use std::fs::File;
+use std::path::Path;
+use super::*;
 
-#[test]
-fn test_temp_dir_deleted() {
-    let name = cotest_create_temp_dir();
-    assert_eq!(Path::new(name.as_str()).exists(), false);
-}
+    #[test]
+    fn test_temp_file_deleted() {
+        let name = cotest_create_temp_file();
+        assert_eq!(Path::new(name.as_str()).exists(), false);
+    }
 
-#[allow(unused)]
-fn cotest_create_temp_dir() -> String {
-    let a = Temp::new().unwrap();
-    fs::create_dir(a.path.as_str()).unwrap();
-    assert_eq!(Path::new(a.path.as_str()).exists(), true);
-    a.path.clone()
-}
+    fn cotest_create_temp_file() -> Box<String> {
+        let a = Temp::new().unwrap();
+        File::create(a.path.as_str()).unwrap();
+        assert_eq!(Path::new(a.path.as_str()).exists(), true);
+        Box::new(a.path.clone())
+    }
 
-#[test]
-fn test_exsits_file_as_temp() {
-    let name = cotest_exists_file_as_temp();
-    assert_eq!(Path::new(name.as_str()).exists(), false);
-}
+    #[test]
+    fn test_temp_dir_deleted() {
+        let name = cotest_create_temp_dir();
+        assert_eq!(Path::new(name.as_str()).exists(), false);
+    }
 
-#[allow(unused)]
-fn cotest_exists_file_as_temp() -> String {
-    let s = make_tmp_file_name();
-    let _ = fs::create_dir(s.as_str());
-    let temp = Temp::as_temp(s.clone());
-    assert_eq!(Path::new(s.as_str()).exists(), true);
-    s
+    fn cotest_create_temp_dir() -> String {
+        let a = Temp::new().unwrap();
+        fs::create_dir(a.path.as_str()).unwrap();
+        assert_eq!(Path::new(a.path.as_str()).exists(), true);
+        a.path.clone()
+    }
+
+    #[test]
+    fn test_exsits_file_as_temp() {
+        let name = cotest_exists_file_as_temp();
+        assert_eq!(Path::new(name.as_str()).exists(), false);
+    }
+
+    fn cotest_exists_file_as_temp() -> String {
+        let s = make_tmp_file_name();
+        let _ = fs::create_dir(s.as_str());
+        let _temp = Temp::as_temp(s.clone());
+        assert_eq!(Path::new(s.as_str()).exists(), true);
+        s
+    }
+
 }
